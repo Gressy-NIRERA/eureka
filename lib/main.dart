@@ -190,7 +190,7 @@ class _HomePageState extends State<HomePage> {
                         show = !show;
                       });
                     },
-                    child: Icon(show?Icons.visibility_off:Icons.visibility),
+                    child: Icon(show ? Icons.visibility_off : Icons.visibility),
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
@@ -241,56 +241,6 @@ class _HomePageState extends State<HomePage> {
                     "Login",
                     style: TextStyle(color: Colors.white, fontSize: 18),
                   ),
-                ),
-              ),
-
-              const SizedBox(height: 30),
-
-              Row(
-                children: [
-                  const Expanded(child: Divider()),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: Text(
-                      "Or",
-                      style: TextStyle(color: Colors.grey.shade700),
-                    ),
-                  ),
-                  const Expanded(child: Divider()),
-                ],
-              ),
-
-              const SizedBox(height: 25),
-
-              OutlinedButton.icon(
-                onPressed: () {},
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 55),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-
-                label: const Text(
-                  "Sign in with Google",
-                  style: TextStyle(color: Colors.black),
-                ),
-              ),
-
-              const SizedBox(height: 15),
-
-              OutlinedButton.icon(
-                onPressed: () {},
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 55),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-                icon: const Icon(Icons.apple, color: Colors.black),
-                label: const Text(
-                  "Sign in with Apple",
-                  style: TextStyle(color: Colors.black),
                 ),
               ),
 
