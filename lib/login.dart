@@ -13,18 +13,84 @@ class LoginWidget extends StatefulWidget {
 class _LoginWidgetState extends State<LoginWidget> {
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
-  final apiuser = Api(Dio());
+
+  final Api api = Api(Dio());
+
+  bool loading = false;
+  bool show = true;
+  Color bgColor = Colors.white;
 
   Future<void> login() async {
+    if (email.text.isEmpty || password.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Veuillez remplir tous les champs")),
+      );
+      return;
+    }
+
+    setState(() {
+      loading = true;
+      bgColor = Colors.black;
+    });
+
     try {
-      final response = apiuser.userlogin(email.text, password.text);
-      print("$response");
-    } catch (error) {
-      print("$error");
+      final response = await api.userlogin(
+        email.text.trim(),
+        password.text.trim(),
+      );
+
+      print(response);
+
+      setState(() {
+        loading = false;
+        bgColor = Colors.green;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Connexion réussie"),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Navigator.pushReplacement(
+      //   context,
+      //   MaterialPageRoute(builder: (context) => const Dashboard()),
+      // );
+    } on DioException catch (e) {
+      setState(() {
+        loading = false;
+        bgColor = Colors.red;
+      });
+
+      print(e.response?.data);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.response?.data.toString() ?? "Erreur de connexion"),
+        ),
+      );
+    } catch (e) {
+      setState(() {
+        loading = false;
+        bgColor = Colors.red;
+      });
+
+      print(e);
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
   }
 
-  
+  @override
+  void dispose() {
+    email.dispose();
+    password.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,11 +162,18 @@ class _LoginWidgetState extends State<LoginWidget> {
 
               TextField(
                 controller: password,
-                obscureText: true,
+                obscureText: show,
                 decoration: InputDecoration(
                   hintText: "Enter your password",
                   prefixIcon: const Icon(Icons.lock_outline),
-                  suffixIcon: const Icon(Icons.visibility_off),
+                  suffixIcon: InkWell(
+                    onTap: () {
+                      setState(() {
+                        show = !show;
+                      });
+                    },
+                    child: Icon(show ? Icons.visibility_off : Icons.visibility),
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
@@ -143,7 +216,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+                      borderRadius: BorderRadius.circular(3),
                     ),
                   ),
                   child: const Text(
@@ -155,8 +228,6 @@ class _LoginWidgetState extends State<LoginWidget> {
 
               const SizedBox(height: 30),
 
-
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -166,12 +237,12 @@ class _LoginWidgetState extends State<LoginWidget> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const Registration (),
+                          builder: (context) => const Registration(),
                         ),
                       );
                     },
                     child: const Text(
-                      "Sign up",
+                      "s'Inscrire",
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),

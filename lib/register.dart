@@ -124,7 +124,7 @@ class _RegistrationState extends State<Registration> {
                   "Create your account for daily updates",
                   style: TextStyle(color: Colors.black),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 5),
 
                 buildField(
                   controller: firstname,

@@ -7,17 +7,13 @@ class Api {
 
   Api(this.dio);
 
-  Future<Map<String, dynamic>> userlogin(
-      String email,
-      String password) async {
+  Future<Map<String, dynamic>> userlogin(String email, String password) async {
     final response = await dio.post(
-      "$baseurl/login", // Vérifie si c'est bien cette URL
-      data: {
-        "email": email,
-        "password": password,
-      },
+      "$baseurl/login",
+      options: Options(headers: {'Content-Type': 'application/json'}),
+      data: {"email": email, "password": password},
     );
-
+    print(response);
     return Map<String, dynamic>.from(response.data);
   }
 
@@ -31,7 +27,7 @@ class Api {
     String confirmPassword,
   ) async {
     final response = await dio.post(
-      "$baseurl/register", // Vérifie aussi cette URL
+      "$baseurl/register",
       data: {
         "firstname": firstname,
         "lastname": lastname,
