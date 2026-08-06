@@ -98,8 +98,7 @@ class _DeliveryWidgetState extends State<DeliveryWidget> {
   double? distanceKm;
   List<PriceOption> prices = [];
   int? selectedPriceIndex;
-
-  static const int minChars = 3;
+static const int minChars = 3;
 
   late final List<RestaurantOrigin> restaurantOrigins;
 
@@ -560,7 +559,7 @@ class _DeliveryWidgetState extends State<DeliveryWidget> {
               height: 50,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
+                  backgroundColor: Colors.orange,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                 ),
                 onPressed: loading ? null : calculer,
