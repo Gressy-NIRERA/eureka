@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'login.dart';
-import 'home.dart';
+import 'package:eureka/Login.dart';
+import 'package:eureka/control.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  await Hive.openBox("cart");
+  await Hive.openBox("wishlist");
   runApp(const MyApp());
 }
 
@@ -19,21 +23,20 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: FutureBuilder<bool>(
-        future: checkLogin(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
+      debugShowCheckedModeBanner:false,
+      home:FutureBuilder<bool>(
+        future:checkLogin(),
+        builder:(context,snapshot){
+          if(!snapshot.hasData){
             return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
+              body:Center(
+                child:CircularProgressIndicator(),
+              ),
             );
           }
-
-          if (snapshot.data == true) {
-            return const Home();
-          } else {
-            return const LoginWidget();
-          }
+          return snapshot.data == true
+              ? const Control()
+              : const LoginWidget();
         },
       ),
     );

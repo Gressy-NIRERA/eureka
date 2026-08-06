@@ -1,7 +1,10 @@
+import 'package:eureka/home.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:eureka/api.dart';
 import 'package:eureka/register.dart';
+import 'package:eureka/control.dart';
+import 'package:eureka/cache_helper.dart';
 
 class LoginWidget extends StatefulWidget {
   const LoginWidget({super.key});
@@ -13,12 +16,33 @@ class LoginWidget extends StatefulWidget {
 class _LoginWidgetState extends State<LoginWidget> {
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
-
   final Api api = Api(Dio());
 
   bool loading = false;
   bool show = true;
-  Color bgColor = Colors.white;
+  late SharedPrefService sharedPrefService;
+
+  @override
+  void initState() {
+    super.initState();
+    sharedPrefService = SharedPrefService();
+    _checkLoginStatus();
+    sharedPrefService.readCache(key: "email").then((cachedEmail) {
+      if (cachedEmail != null) {
+        email.text = cachedEmail;
+      }
+    });
+  }
+
+  Future<void> _checkLoginStatus() async {
+    bool isLoggedIn = await CacheHelper.getLogin();
+    if (isLoggedIn) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Control()),
+      );
+    }
+  }
 
   Future<void> login() async {
     if (email.text.isEmpty || password.text.isEmpty) {
@@ -30,54 +54,57 @@ class _LoginWidgetState extends State<LoginWidget> {
 
     setState(() {
       loading = true;
-      bgColor = Colors.black;
     });
 
     try {
-      final response = await api.userlogin(
-        email.text.trim(),
-        password.text.trim(),
-      );
-
+      final response = await api.userlogin(email.text.trim(), password.text);
       print(response);
 
       setState(() {
         loading = false;
-        bgColor = Colors.green;
       });
+      if (response["status"] == true) {
+        await CacheHelper.saveToken(response["token"]);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Connexion réussie"),
-          backgroundColor: Colors.green,
-        ),
+        await CacheHelper.saveUserData(response["data"]);
+        print(await CacheHelper.getFirstname());
+        print(await CacheHelper.getLastname());
+        print(await CacheHelper.getEmail());
+        print(await CacheHelper.getPhone());
+        print(await CacheHelper.getCountry());
+
+        await CacheHelper.saveLogin(true);
+        await sharedPrefService.writeCache(
+          key: "email",
+          value: email.text.trim(),
+        );
+      }
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => Control()),
       );
-
-      // Navigator.pushReplacement(
-      //   context,
-      //   MaterialPageRoute(builder: (context) => const Dashboard()),
-      // );
     } on DioException catch (e) {
       setState(() {
         loading = false;
-        bgColor = Colors.red;
       });
+
+      String message = "Email ou mot de passe incorrect";
+      final data = e.response?.data;
+      if (data is Map && data["message"] != null) {
+        message = data["message"].toString();
+      }
 
       print(e.response?.data);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.response?.data.toString() ?? "Erreur de connexion"),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(message)));
     } catch (e) {
       setState(() {
         loading = false;
-        bgColor = Colors.red;
       });
-
       print(e);
-
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(e.toString())));
@@ -102,7 +129,6 @@ class _LoginWidgetState extends State<LoginWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 15),
-
               CircleAvatar(
                 radius: 22,
                 backgroundColor: Colors.grey.shade100,
@@ -113,30 +139,22 @@ class _LoginWidgetState extends State<LoginWidget> {
                   },
                 ),
               ),
-
               const SizedBox(height: 35),
-
               const Text(
                 "Welcome Back",
                 style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
               ),
-
               const SizedBox(height: 8),
-
               Text(
                 "Sign in to continue",
                 style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
               ),
-
               const SizedBox(height: 35),
-
               const Text(
                 "Email",
                 style: TextStyle(fontWeight: FontWeight.w500),
               ),
-
               const SizedBox(height: 10),
-
               TextField(
                 controller: email,
                 decoration: InputDecoration(
@@ -150,16 +168,12 @@ class _LoginWidgetState extends State<LoginWidget> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 25),
-
               const Text(
                 "Password",
                 style: TextStyle(fontWeight: FontWeight.w500),
               ),
-
               const SizedBox(height: 10),
-
               TextField(
                 controller: password,
                 obscureText: show,
@@ -182,9 +196,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 15),
-
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
@@ -195,9 +207,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 10),
-
               SizedBox(
                 width: double.infinity,
                 height: 55,
@@ -225,9 +235,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 30),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -248,7 +256,6 @@ class _LoginWidgetState extends State<LoginWidget> {
                   ),
                 ],
               ),
-
               const SizedBox(height: 20),
             ],
           ),

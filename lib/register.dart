@@ -23,30 +23,58 @@ class _RegistrationState extends State<Registration> {
   bool showConfirm = false;
   String country = "BI";
 
-  Future<void> register() async {
-    if (!_formKey.currentState!.validate()) return;
-    try {
-      final response = apire.register(
-        firstname.text,
-        lastname.text,
-        int.parse(phonenumber.text),
-        email.text,
-        country,
-        password.text,
-        confirm.text,
+Future<void> register() async {
+  if (!_formKey.currentState!.validate()) return;
+
+  try {
+    final response = await apire.register(
+      firstname.text.trim(),
+      lastname.text.trim(),
+      int.parse(phonenumber.text.trim()),
+      email.text.trim(),
+      country,
+      password.text,
+      confirm.text,
+    );
+
+    print(response);
+
+    if (response["status"] == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Compte créé avec succès"),
+          backgroundColor: Colors.green,
+        ),
       );
-      print("$response");
-    } catch (e) {
-      print("$e");
+
+      
+      Navigator.pop(context);
+    
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(response["message"] ?? "Échec de l'inscription"),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
+  } on DioException catch (e) {
+  print(e.response?.data);
+} catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(e.toString()),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
+}
 
   @override
   void dispose() {
     firstname.dispose();
     lastname.dispose();
     email.dispose();
-    phonenumber.dispose();
     password.dispose();
     confirm.dispose();
     super.dispose();
@@ -202,9 +230,7 @@ class _RegistrationState extends State<Registration> {
                 ),
 
                 const SizedBox(height: 10),
-
-                
-                SizedBox(
+                  SizedBox(
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton(
