@@ -33,12 +33,13 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  static const Color kPrimary = Color(0xFFFF5A1F);
-  static const Color kPrimaryDark = Color(0xFFE34B18);
-  static const Color kBg = Color(0xFFF7F7F8);
-  static const Color kTextDark = Color(0xFF191919);
-  static const Color kTextGrey = Color(0xFF77777F);
-  static const Color kChipBg = Color(0xFFEFEFF1);
+  static const Color kPrimary = Color(0xFFFF5722);
+  static const Color kPrimaryLight = Color(0xFFFFF0EC);
+  static const Color kBg = Color(0xFFF9FAFC);
+  static const Color kSurface = Colors.white;
+  static const Color kTextDark = Color(0xFF1E2022);
+  static const Color kTextGrey = Color(0xFF8A94A6);
+  static const Color kBorderColor = Color(0xFFF0F2F5);
 
   Map mapResponse = {};
   List products = [];
@@ -234,14 +235,17 @@ class _HomeState extends State<Home> {
           behavior: SnackBarBehavior.floating,
           backgroundColor: kTextDark,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
           ),
           margin: const EdgeInsets.all(16),
           content: const Row(
             children: [
-              Icon(Icons.favorite, color: kPrimary, size: 18),
-              SizedBox(width: 10),
-              Text("Ajouté aux favoris"),
+              Icon(Icons.favorite_rounded, color: kPrimary, size: 20),
+              SizedBox(width: 12),
+              Text(
+                "Ajouté aux favoris",
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
             ],
           ),
         ),
@@ -252,10 +256,13 @@ class _HomeState extends State<Home> {
           behavior: SnackBarBehavior.floating,
           backgroundColor: kTextDark,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(16),
           ),
           margin: const EdgeInsets.all(16),
-          content: const Text("Déjà dans les favoris"),
+          content: const Text(
+            "Déjà dans les favoris",
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
         ),
       );
     }
@@ -263,32 +270,50 @@ class _HomeState extends State<Home> {
 
   Widget _sectionHeader({
     required String title,
+    String? subtitle,
     required int count,
   }) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 19,
-            fontWeight: FontWeight.w800,
-            color: kTextDark,
-            letterSpacing: -0.3,
-          ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w800,
+                color: kTextDark,
+                letterSpacing: -0.4,
+              ),
+            ),
+            if (subtitle != null) ...[
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: kTextGrey,
+                ),
+              ),
+            ],
+          ],
         ),
-        const SizedBox(width: 8),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: BoxDecoration(
-            color: kChipBg,
-            borderRadius: BorderRadius.circular(12),
+            color: kPrimaryLight,
+            borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
-            "$count",
+            "$count dispo",
             style: const TextStyle(
-              color: kTextGrey,
+              color: kPrimary,
               fontWeight: FontWeight.w700,
-              fontSize: 12,
+              fontSize: 11,
             ),
           ),
         ),
@@ -301,78 +326,103 @@ class _HomeState extends State<Home> {
     return Scaffold(
       backgroundColor: kBg,
       appBar: AppBar(
-  backgroundColor: Colors.white,
-  elevation: 0,
-  automaticallyImplyLeading: false,
-  titleSpacing: 14,
-  title: const Text(
-    "Menu",
-    style: TextStyle(
-      color: kTextDark,
-      fontWeight: FontWeight.w800,
-      fontSize: 22,
-      letterSpacing: -0.3,
-    ),
-  ),
-
-  centerTitle: false,
-
-  actions: [
-    Padding(
-      padding: const EdgeInsets.only(right: 18),
-      child: Container(
-        height: 36,
-        padding: const EdgeInsets.symmetric(horizontal: 9),
-        decoration: BoxDecoration(
-          color: kChipBg,
-          borderRadius: BorderRadius.circular(19),
-        ),
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<String>(
-            value: selectedLanguage,
-            underline: const SizedBox(),
-            icon: const Icon(
-              Icons.keyboard_arrow_down_rounded,
-              size: 20,
-              color: kTextGrey,
+        backgroundColor: kBg,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        titleSpacing: 16,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: const [
+            Text(
+              "LIVRER À",
+              style: TextStyle(
+                color: kPrimary,
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.1,
+              ),
             ),
-            borderRadius: BorderRadius.circular(14),
-            items: languages.map((lang) {
-              return DropdownMenuItem<String>(
-                value: lang[0],
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      lang[2],
-                      style: const TextStyle(fontSize: 15),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      lang[1],
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: kTextDark,
-                      ),
-                    ),
-                  ],
+            SizedBox(height: 2),
+            Row(
+              children: [
+                Icon(Icons.location_on_rounded, color: kTextDark, size: 16),
+                SizedBox(width: 4),
+                Text(
+                  "Bujumbura, Burundi",
+                  style: TextStyle(
+                    color: kTextDark,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
+                  ),
                 ),
-              );
-            }).toList(),
-            onChanged: (value) {
-              if (value != null) {
-                setState(() {
-                  selectedLanguage = value;
-                });
-              }
-            },
-          ),
+                Icon(Icons.keyboard_arrow_down_rounded, color: kTextDark, size: 18),
+              ],
+            ),
+          ],
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: Container(
+              height: 38,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(
+                color: kSurface,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: kBorderColor, width: 1.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.03),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  )
+                ],
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: selectedLanguage,
+                  icon: const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    size: 18,
+                    color: kTextGrey,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  items: languages.map((lang) {
+                    return DropdownMenuItem<String>(
+                      value: lang[0],
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            lang[2],
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            lang[1],
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: kTextDark,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        selectedLanguage = value;
+                      });
+                    }
+                  },
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
-    ),
-  ],
-),
       body: fetchlist
           ? const Center(
               child: CircularProgressIndicator(color: kPrimary),
@@ -387,67 +437,73 @@ class _HomeState extends State<Home> {
                 ]);
               },
               child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(
-                  parent: BouncingScrollPhysics(),
+                physics: const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
                 ),
-                padding: const EdgeInsets.fromLTRB(14, 16, 14, 22),
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      height: 52,
+                      height: 54,
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(15),
+                        color: kSurface,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: kBorderColor, width: 1.5),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
-                            blurRadius: 14,
-                            offset: const Offset(0, 6),
+                            color: Colors.black.withOpacity(0.03),
+                            blurRadius: 15,
+                            offset: const Offset(0, 4),
                           )
                         ],
                       ),
                       child: TextField(
                         controller: searchController,
                         onChanged: searchProduct,
-                        style: const TextStyle(fontSize: 14, color: kTextDark),
+                        style: const TextStyle(fontSize: 14, color: kTextDark, fontWeight: FontWeight.w600),
                         decoration: InputDecoration(
-                          hintText: "Rechercher un produit...",
-                          hintStyle:
-                              const TextStyle(color: kTextGrey, fontSize: 14),
+                          hintText: "Recherche un produit...",
+                          hintStyle: const TextStyle(color: kTextGrey, fontSize: 14, fontWeight: FontWeight.w400),
                           prefixIcon: const Icon(
                             Icons.search_rounded,
                             color: kPrimary,
+                            size: 22,
                           ),
                           suffixIcon: searchController.text.isNotEmpty
                               ? IconButton(
-                                  icon: const Icon(Icons.close_rounded,
-                                      color: kTextGrey),
+                                  icon: const Icon(Icons.cancel_rounded, color: kTextGrey, size: 20),
                                   onPressed: () {
                                     searchController.clear();
                                     searchProduct("");
                                   },
                                 )
-                              : null,
+                              : Container(
+                                  margin: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: kPrimaryLight,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Icon(Icons.tune_rounded, color: kPrimary, size: 18),
+                                ),
                           border: InputBorder.none,
-                          contentPadding:
-                              const EdgeInsets.symmetric(vertical: 16),
+                          contentPadding: const EdgeInsets.symmetric(vertical: 16),
                         ),
                       ),
                     ),
 
-                    const SizedBox(height: 24),
-
+                    const SizedBox(height: 20),
                     _sectionHeader(
                       title: "Catégories",
                       count: categories.length,
                     ),
 
-                    const SizedBox(height: 11),
+                    const SizedBox(height: 14),
                     SizedBox(
-                      height: 44,
+                      height: 50,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
+                        physics: const BouncingScrollPhysics(),
                         itemCount: categories.length,
                         itemBuilder: (context, index) {
                           final category = categories[index];
@@ -464,22 +520,39 @@ class _HomeState extends State<Home> {
                               );
                             },
                             child: Container(
-                              margin: const EdgeInsets.only(right: 10),
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              margin: const EdgeInsets.only(right: 12),
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                               decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(13),
-                                border: Border.all(color: kChipBg, width: 1.4),
+                                color: kSurface,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: kBorderColor, width: 1.5),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.02),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  CircleAvatar(
-                                    radius: 11,
-                                    backgroundColor: kChipBg,
-                                    backgroundImage: NetworkImage(category.image),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Image.network(
+                                      category.image,
+                                      width: 28,
+                                      height: 28,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (c, e, s) => Container(
+                                        width: 28,
+                                        height: 28,
+                                        color: kPrimaryLight,
+                                        child: const Icon(Icons.fastfood, color: kPrimary, size: 16),
+                                      ),
+                                    ),
                                   ),
-                                  const SizedBox(width: 8),
+                                  const SizedBox(width: 10),
                                   Text(
                                     category.name[selectedLanguage] ??
                                         category.name["fr"],
@@ -499,23 +572,21 @@ class _HomeState extends State<Home> {
                       ),
                     ),
 
-                    const SizedBox(height: 24),
-
+                    const SizedBox(height: 28),
                     _sectionHeader(
-                      title: "Produits",
+                      title: "Products",
                       count: isSearching ? searchResults.length : products.length,
                     ),
 
-                    const SizedBox(height: 11),
+                    const SizedBox(height: 14),
                     SizedBox(
-                      height: 295,
+                      height: 280,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
-                        itemCount:
-                            isSearching ? searchResults.length : products.length,
+                        physics: const BouncingScrollPhysics(),
+                        itemCount: isSearching ? searchResults.length : products.length,
                         itemBuilder: (context, index) {
-                          final product =
-                              isSearching ? searchResults[index] : products[index];
+                          final product = isSearching ? searchResults[index] : products[index];
 
                           return GestureDetector(
                             onTap: () {
@@ -530,17 +601,17 @@ class _HomeState extends State<Home> {
                               );
                             },
                             child: Container(
-                              width: 205,
-                              margin: const EdgeInsets.only(right: 14),
-                              padding: const EdgeInsets.all(9),
+                              width: 210,
+                              margin: const EdgeInsets.only(right: 16, bottom: 6),
                               decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(18),
+                                color: kSurface,
+                                borderRadius: BorderRadius.circular(22),
+                                border: Border.all(color: kBorderColor, width: 1),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.05),
-                                    blurRadius: 16,
-                                    offset: const Offset(0, 8),
+                                    color: Colors.black.withOpacity(0.04),
+                                    blurRadius: 14,
+                                    offset: const Offset(0, 6),
                                   )
                                 ],
                               ),
@@ -549,43 +620,61 @@ class _HomeState extends State<Home> {
                                 children: [
                                   Stack(
                                     children: [
-                                      Container(
-                                        height: 135,
-                                        width: double.infinity,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(18),
-                                          color: const Color(0xffF3F3F3),
-                                        ),
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(18),
-                                          child: Image.network(
-                                            product["images"][0]["image"],
-                                            fit: BoxFit.cover,
-                                            width: double.infinity,
+                                      ClipRRect(
+                                        borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+                                        child: Image.network(
+                                          product["images"][0]["image"],
+                                          height: 140,
+                                          width: double.infinity,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (c, e, s) => Container(
+                                            height: 140,
+                                            color: kBorderColor,
+                                            child: const Icon(Icons.image_not_supported, color: kTextGrey),
                                           ),
                                         ),
                                       ),
+                                      // Prix en badge flottant
                                       Positioned(
-                                        right: 8,
-                                        top: 8,
+                                        left: 10,
+                                        bottom: 10,
                                         child: Container(
-                                          padding: const EdgeInsets.all(7),
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                           decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            shape: BoxShape.circle,
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black
-                                                    .withOpacity(0.08),
-                                                blurRadius: 6,
-                                              ),
-                                            ],
+                                            color: kTextDark.withOpacity(0.85),
+                                            borderRadius: BorderRadius.circular(12),
                                           ),
-                                          child: GestureDetector(
-                                            onTap: () => addToWishlist(product),
+                                          child: Text(
+                                            "${product["price"]} FBU",
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w800,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      // Bouton favori
+                                      Positioned(
+                                        right: 10,
+                                        top: 10,
+                                        child: GestureDetector(
+                                          onTap: () => addToWishlist(product),
+                                          child: Container(
+                                            padding: const EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                              color: kSurface,
+                                              shape: BoxShape.circle,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.black.withOpacity(0.1),
+                                                  blurRadius: 8,
+                                                ),
+                                              ],
+                                            ),
                                             child: const Icon(
-                                              Icons.favorite_border_rounded,
-                                              size: 18,
+                                              Icons.favorite_rounded,
+                                              size: 16,
                                               color: kPrimary,
                                             ),
                                           ),
@@ -593,49 +682,34 @@ class _HomeState extends State<Home> {
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 10),
-                                  Text(
-                                    getLocalizedText(product["title"]),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w800,
-                                      color: kTextDark,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    getLocalizedText(product["description"]),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: kTextGrey,
-                                      fontSize: 12,
-                                      height: 1.3,
-                                    ),
-                                  ),
-                                  const Spacer(),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 10, vertical: 5),
-                                        decoration: BoxDecoration(
-                                          color: kPrimary.withOpacity(0.1),
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        child: Text(
-                                          "${product["price"]} FBU",
+                                  Padding(
+                                    padding: const EdgeInsets.all(12),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          getLocalizedText(product["title"]),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(
-                                            fontSize: 13,
+                                            fontSize: 15,
                                             fontWeight: FontWeight.w800,
-                                            color: kPrimaryDark,
+                                            color: kTextDark,
                                           ),
                                         ),
-                                      ),
-                                    ],
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          getLocalizedText(product["description"]),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            color: kTextGrey,
+                                            fontSize: 12,
+                                            height: 1.3,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),
@@ -645,20 +719,20 @@ class _HomeState extends State<Home> {
                       ),
                     ),
 
-                    const SizedBox(height: 24),
-                    
+                    const SizedBox(height: 28),
                     _sectionHeader(
-                      title: "Restaurants",
+                      title: "Nos Restaurants",
                       count: restaurants.length,
                     ),
 
-                    const SizedBox(height: 11),
+                    const SizedBox(height: 14),
 
                     if (loadingRestaurants)
                       const SizedBox(
-                        height: 60,
+                        height: 80,
                         child: Center(
-                            child: CircularProgressIndicator(color: kPrimary)),
+                          child: CircularProgressIndicator(color: kPrimary),
+                        ),
                       )
                     else if (restaurantsError != null)
                       Container(
@@ -667,18 +741,16 @@ class _HomeState extends State<Home> {
                         decoration: BoxDecoration(
                           color: const Color(0xFFFFF1EE),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: kPrimary.withOpacity(0.15)),
+                          border: Border.all(color: kPrimary.withOpacity(0.2)),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.info_outline_rounded,
-                                color: kPrimaryDark, size: 18),
-                            const SizedBox(width: 10),
+                            const Icon(Icons.error_outline_rounded, color: kPrimary, size: 20),
+                            const SizedBox(width: 12),
                             Expanded(
                               child: Text(
                                 restaurantsError!,
-                                style: const TextStyle(
-                                    color: kPrimaryDark, fontSize: 12.5),
+                                style: const TextStyle(color: kPrimary, fontSize: 13, fontWeight: FontWeight.w500),
                               ),
                             ),
                           ],
@@ -686,9 +758,10 @@ class _HomeState extends State<Home> {
                       )
                     else
                       SizedBox(
-                        height: 175,
+                        height: 190,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
                           itemCount: restaurants.length,
                           itemBuilder: (context, index) {
                             final restaurant = restaurants[index];
@@ -709,50 +782,52 @@ class _HomeState extends State<Home> {
                                 );
                               },
                               child: Container(
-                                width: 145,
-                                margin: const EdgeInsets.only(right: 14),
-                                padding: const EdgeInsets.all(11),
+                                width: 155,
+                                margin: const EdgeInsets.only(right: 14, bottom: 6),
+                                padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(17),
+                                  color: kSurface,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: kBorderColor, width: 1),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.05),
-                                      blurRadius: 14,
-                                      offset: const Offset(0, 6),
+                                      color: Colors.black.withOpacity(0.04),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 5),
                                     )
                                   ],
                                 ),
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(50),
-                                      child: (restaurant["image"] ?? "")
-                                              .toString()
-                                              .isNotEmpty
-                                          ? Image.network(
-                                              restaurant["image"],
-                                              width: 66,
-                                              height: 66,
-                                              fit: BoxFit.cover,
-                                              errorBuilder: (c, e, s) => Container(
-                                                width: 66,
-                                                height: 66,
-                                                color: kChipBg,
-                                                child: const Icon(
-                                                    Icons.storefront_rounded,
-                                                    color: kTextGrey),
+                                    Container(
+                                      padding: const EdgeInsets.all(3),
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(color: kPrimaryLight, width: 2),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(50),
+                                        child: (restaurant["image"] ?? "").toString().isNotEmpty
+                                            ? Image.network(
+                                                restaurant["image"],
+                                                width: 64,
+                                                height: 64,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (c, e, s) => Container(
+                                                  width: 64,
+                                                  height: 64,
+                                                  color: kPrimaryLight,
+                                                  child: const Icon(Icons.storefront_rounded, color: kPrimary),
+                                                ),
+                                              )
+                                            : Container(
+                                                width: 64,
+                                                height: 64,
+                                                color: kPrimaryLight,
+                                                child: const Icon(Icons.storefront_rounded, color: kPrimary),
                                               ),
-                                            )
-                                          : Container(
-                                              width: 66,
-                                              height: 66,
-                                              color: kChipBg,
-                                              child: const Icon(
-                                                  Icons.storefront_rounded,
-                                                  color: kTextGrey),
-                                            ),
+                                      ),
                                     ),
                                     const SizedBox(height: 10),
                                     Text(
@@ -762,23 +837,31 @@ class _HomeState extends State<Home> {
                                       textAlign: TextAlign.center,
                                       style: const TextStyle(
                                         fontWeight: FontWeight.w800,
-                                        fontSize: 13,
+                                        fontSize: 14,
                                         color: kTextDark,
                                       ),
                                     ),
-                                    if ((restaurant["address"] ?? "")
-                                        .toString()
-                                        .isNotEmpty) ...[
+                                    if ((restaurant["address"] ?? "").toString().isNotEmpty) ...[
                                       const SizedBox(height: 4),
-                                      Text(
-                                        restaurant["address"],
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: kTextGrey,
-                                        ),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          const Icon(Icons.location_on_outlined, size: 12, color: kTextGrey),
+                                          const SizedBox(width: 2),
+                                          Expanded(
+                                            child: Text(
+                                              restaurant["address"],
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              textAlign: TextAlign.center,
+                                              style: const TextStyle(
+                                                fontSize: 11,
+                                                color: kTextGrey,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ],
@@ -789,7 +872,7 @@ class _HomeState extends State<Home> {
                         ),
                       ),
 
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 16),
                   ],
                 ),
               ),

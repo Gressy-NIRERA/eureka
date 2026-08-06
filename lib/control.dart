@@ -43,10 +43,10 @@ class _ControlState extends State<Control> {
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.fromLTRB(18, 0, 18, 16),
         child: Container(
-          height: 66,
+          height: 40,
           padding: const EdgeInsets.symmetric(horizontal: 8),
           decoration: BoxDecoration(
-            color: const Color(0xFF1B1B1F),
+            color: const Color(0xFFFFFFFF),
             borderRadius: BorderRadius.circular(28),
             boxShadow: [
               BoxShadow(
