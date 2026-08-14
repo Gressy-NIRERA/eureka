@@ -533,9 +533,9 @@ class Shop extends StatelessWidget {
     final cart = Hive.box("cart");
 
     return Scaffold(
-      backgroundColor: kBg,
+    backgroundColor: const Color.fromARGB(255, 237, 228, 216),
       appBar: AppBar(
-        backgroundColor: kBg,
+        backgroundColor: const Color.fromARGB(255, 237, 228, 216),
         elevation: 0,
         automaticallyImplyLeading: false,
         titleSpacing: 16,

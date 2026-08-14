@@ -194,8 +194,7 @@ static const int minChars = 3;
     if (distanceField is num) return distanceField.toDouble();
     if (distanceField is String) {
       final parsed = double.tryParse(distanceField);
-      if (parsed != null) return parsed;
-      // Cas "5.8 km" -> on extrait le nombre
+      if (parsed != null) return parsed; 
       final match = RegExp(r'[\d.]+').firstMatch(distanceField);
       if (match != null) return double.tryParse(match.group(0)!) ?? 0;
     }
@@ -494,9 +493,9 @@ static const int minChars = 3;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffF7F7F7),
+     backgroundColor: const Color.fromARGB(255, 237, 228, 216),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color.fromARGB(255, 237, 228, 216),
         elevation: 0,
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.black),
@@ -513,7 +512,7 @@ static const int minChars = 3;
               padding: const EdgeInsets.all(15),
               margin: const EdgeInsets.only(bottom: 20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: const Color.fromARGB(255, 237, 228, 216),
                 borderRadius: BorderRadius.circular(15),
               ),
               child: Row(
@@ -595,7 +594,7 @@ static const int minChars = 3;
                 height: 50,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
+                    backgroundColor: Colors.orange.shade400,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                   ),
                   onPressed: selectedPriceIndex == null ? null : continuerVersPaiement,

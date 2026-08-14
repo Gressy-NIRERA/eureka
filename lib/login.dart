@@ -1,6 +1,6 @@
-import 'package:eureka/home.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+
 import 'package:eureka/api.dart';
 import 'package:eureka/register.dart';
 import 'package:eureka/control.dart';
@@ -16,38 +16,50 @@ class LoginWidget extends StatefulWidget {
 class _LoginWidgetState extends State<LoginWidget> {
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
+
   final Api api = Api(Dio());
 
   bool loading = false;
   bool show = true;
+
   late SharedPrefService sharedPrefService;
 
   @override
   void initState() {
     super.initState();
+
     sharedPrefService = SharedPrefService();
+
     _checkLoginStatus();
+
     sharedPrefService.readCache(key: "email").then((cachedEmail) {
-      if (cachedEmail != null) {
+      if (cachedEmail != null && mounted) {
         email.text = cachedEmail;
       }
     });
   }
 
+  // Vérifie si l'utilisateur est déjà connecté
   Future<void> _checkLoginStatus() async {
     bool isLoggedIn = await CacheHelper.getLogin();
-    if (isLoggedIn) {
+
+    if (isLoggedIn && mounted) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => Control()),
+        MaterialPageRoute(
+          builder: (context) => const Control(),
+        ),
       );
     }
   }
 
+  // Connexion
   Future<void> login() async {
-    if (email.text.isEmpty || password.text.isEmpty) {
+    if (email.text.trim().isEmpty || password.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Veuillez remplir tous les champs")),
+        const SnackBar(
+          content: Text("Veuillez remplir tous les champs"),
+        ),
       );
       return;
     }
@@ -57,57 +69,100 @@ class _LoginWidgetState extends State<LoginWidget> {
     });
 
     try {
-      final response = await api.userlogin(email.text.trim(), password.text);
-      print(response);
+      final response = await api.userlogin(
+        email.text.trim(),
+        password.text,
+      );
 
-      setState(() {
-        loading = false;
-      });
+      print("LOGIN RESPONSE : $response");
+
       if (response["status"] == true) {
-        await CacheHelper.saveToken(response["token"]);
+        // Sauvegarde du token
+        if (response["token"] != null) {
+          await CacheHelper.saveToken(
+            response["token"].toString(),
+          );
+        }
 
-        await CacheHelper.saveUserData(response["data"]);
-        print(await CacheHelper.getFirstname());
-        print(await CacheHelper.getLastname());
-        print(await CacheHelper.getEmail());
-        print(await CacheHelper.getPhone());
-        print(await CacheHelper.getCountry());
+        // Sauvegarde des informations utilisateur
+        if (response["data"] != null) {
+          await CacheHelper.saveUserData(
+            response["data"],
+          );
+        }
 
+        // Vérification des données sauvegardées
+        print("FIRSTNAME : ${await CacheHelper.getFirstname()}");
+        print("LASTNAME : ${await CacheHelper.getLastname()}");
+        print("EMAIL : ${await CacheHelper.getEmail()}");
+        print("PHONE : ${await CacheHelper.getPhone()}");
+        print("COUNTRY : ${await CacheHelper.getCountry()}");
+
+        // Sauvegarde de l'état de connexion
         await CacheHelper.saveLogin(true);
+
+        // Sauvegarde de l'email
         await sharedPrefService.writeCache(
           key: "email",
           value: email.text.trim(),
         );
-      }
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => Control()),
-      );
+        if (!mounted) return;
+
+        // Aller vers la page principale
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const Control(),
+          ),
+        );
+      } else {
+        final message =
+            response["message"]?.toString() ??
+            "Email ou mot de passe incorrect";
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(message),
+            ),
+          );
+        }
+      }
     } on DioException catch (e) {
-      setState(() {
-        loading = false;
-      });
+      print("DIO ERROR : ${e.response?.data}");
 
       String message = "Email ou mot de passe incorrect";
+
       final data = e.response?.data;
+
       if (data is Map && data["message"] != null) {
         message = data["message"].toString();
       }
 
-      print(e.response?.data);
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(message)));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+          ),
+        );
+      }
     } catch (e) {
-      setState(() {
-        loading = false;
-      });
-      print(e);
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(e.toString())));
+      print("ERROR : $e");
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString()),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          loading = false;
+        });
+      }
     }
   }
 
@@ -121,141 +176,254 @@ class _LoginWidgetState extends State<LoginWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color.fromARGB(255, 237, 228, 216),
+
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 25),
+
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 15),
+
+              // Bouton retour
               CircleAvatar(
                 radius: 22,
                 backgroundColor: Colors.grey.shade100,
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.black),
+                  icon: const Icon(
+                    Icons.arrow_back,
+                    color: Colors.orange,
+                  ),
                   onPressed: () {
                     Navigator.pop(context);
                   },
                 ),
               ),
+
               const SizedBox(height: 35),
-              const Text(
+
+              // Titre
+              Text(
                 "Welcome Back",
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.orange.shade400,
+                ),
               ),
+
               const SizedBox(height: 8),
+
+              // Sous-titre
               Text(
                 "Sign in to continue",
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontSize: 16,
+                ),
               ),
+
               const SizedBox(height: 35),
+
+              // Email
               const Text(
                 "Email",
-                style: TextStyle(fontWeight: FontWeight.w500),
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: Colors.orange,
+                ),
               ),
+
               const SizedBox(height: 10),
+
               TextField(
                 controller: email,
+                keyboardType: TextInputType.emailAddress,
+
                 decoration: InputDecoration(
                   hintText: "Enter your email",
-                  prefixIcon: const Icon(Icons.email_outlined),
+
+                  prefixIcon: const Icon(
+                    Icons.email_outlined,
+                  ),
+
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
+
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
+
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: const BorderSide(
+                      color: Colors.orange,
+                      width: 2,
+                    ),
+                  ),
                 ),
               ),
+
               const SizedBox(height: 25),
-              const Text(
+
+              // Password
+              Text(
                 "Password",
-                style: TextStyle(fontWeight: FontWeight.w500),
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: Colors.orange.shade400,
+                ),
               ),
+
               const SizedBox(height: 10),
+
               TextField(
                 controller: password,
                 obscureText: show,
+
                 decoration: InputDecoration(
                   hintText: "Enter your password",
-                  prefixIcon: const Icon(Icons.lock_outline),
+
+                  prefixIcon: const Icon(
+                    Icons.lock_outline,
+                  ),
+
                   suffixIcon: InkWell(
                     onTap: () {
                       setState(() {
                         show = !show;
                       });
                     },
-                    child: Icon(show ? Icons.visibility_off : Icons.visibility),
+
+                    child: Icon(
+                      show
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ),
                   ),
+
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
+
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
-                ),
-              ),
-              const SizedBox(height: 15),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () {},
-                  child: const Text(
-                    "Forgot Password?",
-                    style: TextStyle(color: Colors.black),
+
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: const BorderSide(
+                      color: Colors.orange,
+                      width: 2,
+                    ),
                   ),
                 ),
               ),
+
+              const SizedBox(height: 15),
+
+              // Mot de passe oublié
+              Align(
+                alignment: Alignment.centerRight,
+
+                child: TextButton(
+                  onPressed: () {
+                    // Ajouter ici la récupération du mot de passe
+                  },
+
+                  child: Text(
+                    "Forgot Password?",
+                    style: TextStyle(
+                      color: Colors.orange.shade400,
+                    ),
+                  ),
+                ),
+              ),
+
               const SizedBox(height: 10),
+
+              // Bouton Login
               SizedBox(
                 width: double.infinity,
                 height: 55,
+
                 child: ElevatedButton(
-                  onPressed: () {
-                    if (email.text.isNotEmpty && password.text.isNotEmpty) {
-                      login();
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Veuillez remplir tous les champs"),
-                        ),
-                      );
-                    }
-                  },
+                  onPressed: loading
+                      ? null
+                      : () {
+                          login();
+                        },
+
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
+                    backgroundColor: Colors.orange.shade400,
+
+                    disabledBackgroundColor:
+                        Colors.orange.shade400.withOpacity(0.6),
+
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(3),
                     ),
                   ),
-                  child: const Text(
-                    "Login",
-                    style: TextStyle(color: Colors.white, fontSize: 18),
-                  ),
+
+                  child: loading
+                      ? const SizedBox(
+                          width: 25,
+                          height: 25,
+
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
+                        )
+                      : const Text(
+                          "Login",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
+                        ),
                 ),
               ),
+
               const SizedBox(height: 30),
+
+              // Inscription
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+
                 children: [
-                  const Text("tu n as pas de compte? "),
+                  const Text(
+                    "Tu n'as pas de compte ? ",
+                  ),
+
                   TextButton(
                     onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const Registration(),
+                          builder: (context) =>
+                              const Registration(),
                         ),
                       );
                     },
+
                     child: const Text(
-                      "s'Inscrire",
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      "S'inscrire",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.orange,
+                      ),
                     ),
                   ),
                 ],
               ),
+
               const SizedBox(height: 20),
             ],
           ),

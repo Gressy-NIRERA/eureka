@@ -1,3 +1,4 @@
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:eureka/api.dart';
@@ -11,6 +12,7 @@ class Registration extends StatefulWidget {
 
 class _RegistrationState extends State<Registration> {
   final _formKey = GlobalKey<FormState>();
+
   final TextEditingController firstname = TextEditingController();
   final TextEditingController lastname = TextEditingController();
   final TextEditingController email = TextEditingController();
@@ -18,69 +20,125 @@ class _RegistrationState extends State<Registration> {
   final TextEditingController password = TextEditingController();
   final TextEditingController confirm = TextEditingController();
 
-  final apire = Api((Dio()));
+  final apire = Api(Dio());
+
   bool showPassword = false;
   bool showConfirm = false;
+  bool loading = false;
+
   String country = "BI";
 
-Future<void> register() async {
-  if (!_formKey.currentState!.validate()) return;
+  
+  static const Color backgroundColor =
+      Color.fromARGB(255, 237, 228, 216);
 
-  try {
-    final response = await apire.register(
-      firstname.text.trim(),
-      lastname.text.trim(),
-      int.parse(phonenumber.text.trim()),
-      email.text.trim(),
-      country,
-      password.text,
-      confirm.text,
-    );
+  static const Color primaryColor = Color(0xFFFFB74D);
 
-    print(response);
+  static const Color fieldColor = Colors.white;
 
-    if (response["status"] == true) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Compte créé avec succès"),
-          backgroundColor: Colors.green,
-        ),
+  Future<void> register() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      loading = true;
+    });
+
+    try {
+      final response = await apire.register(
+        firstname.text.trim(),
+        lastname.text.trim(),
+        phonenumber.text.trim(),
+        email.text.trim(),
+        country,
+        password.text,
+        confirm.text,
       );
 
-      
-      Navigator.pop(context);
-    
-    } else {
+      print("Réponse API : $response");
+
+      if (response["status"] == true) {
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Compte créé avec succès"),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        Navigator.pop(context);
+      } else {
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              response["message"] ?? "Échec de l'inscription",
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } on DioException catch (e) {
+      print("Erreur Dio : ${e.response?.data}");
+
+      if (!mounted) return;
+
+      String message = "Une erreur est survenue";
+
+      if (e.response?.data is Map) {
+        final data = e.response!.data;
+
+        message = data["message"]?.toString() ??
+            "Erreur lors de l'inscription";
+
+        if (data["errors"]?["phonenumber"] != null) {
+          final errors = data["errors"]["phonenumber"];
+
+          if (errors is List && errors.isNotEmpty) {
+            message = errors.first.toString();
+          }
+        }
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(response["message"] ?? "Échec de l'inscription"),
+          content: Text(message),
           backgroundColor: Colors.red,
         ),
       );
+    } catch (e) {
+      print("Erreur : $e");
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          loading = false;
+        });
+      }
     }
-  } on DioException catch (e) {
-  print(e.response?.data);
-} catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(e.toString()),
-        backgroundColor: Colors.red,
-      ),
-    );
   }
-}
 
   @override
   void dispose() {
     firstname.dispose();
     lastname.dispose();
     email.dispose();
+    phonenumber.dispose();
     password.dispose();
     confirm.dispose();
+
     super.dispose();
   }
 
- 
   Widget buildField({
     required TextEditingController controller,
     required String label,
@@ -93,27 +151,82 @@ Future<void> register() async {
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
+
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+
         children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 6),
+          Text(
+            label,
+            style: const TextStyle(
+              fontWeight: FontWeight.w500,
+              color: Colors.orange,
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
           TextFormField(
             controller: controller,
             obscureText: obscure,
             keyboardType: keyboardType,
+
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: const TextStyle(color: Colors.black),
-              prefixIcon: Icon(icon, color: Colors.black),
+
+              hintStyle: TextStyle(
+                color: Colors.grey.shade500,
+              ),
+
+              prefixIcon: const Icon(
+                Icons.person_outline,
+                color: Colors.orange,
+              ),
+
               suffixIcon: suffix,
+
               filled: true,
-              fillColor: Colors.grey.shade100,
+              fillColor: fieldColor,
+
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 16,
+                horizontal: 20,
+              ),
+
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30),
                 borderSide: BorderSide.none,
               ),
+
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30),
+                borderSide: BorderSide.none,
+              ),
+
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30),
+                borderSide: const BorderSide(
+                  color: primaryColor,
+                  width: 2,
+                ),
+              ),
+
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30),
+                borderSide: const BorderSide(
+                  color: Colors.red,
+                ),
+              ),
+
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(30),
+                borderSide: const BorderSide(
+                  color: Colors.red,
+                  width: 2,
+                ),
+              ),
             ),
+
             validator: validator,
           ),
         ],
@@ -124,52 +237,88 @@ Future<void> register() async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
+
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 25,
+          ),
+
           child: Form(
             key: _formKey,
+
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+
               children: [
-                const SizedBox(height: 10),
-                
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const CircleAvatar(
-                    backgroundColor: Color(0xFFF1F1F1),
-                    child: Icon(Icons.arrow_back, color: Colors.black),
+                const SizedBox(height: 15),
+
+               
+                CircleAvatar(
+                  radius: 22,
+                  backgroundColor: Colors.grey.shade100,
+
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: Colors.orange,
+                    ),
+
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
                   ),
                 ),
-                const SizedBox(height: 10),
-                const Text(
-                  "Create Account",
-                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 6),
-                const Text(
-                  "Create your account for daily updates",
-                  style: TextStyle(color: Colors.black),
-                ),
-                const SizedBox(height: 5),
 
+                const SizedBox(height: 35),
+
+               
+                Text(
+                  "Create Account",
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange.shade400,
+                  ),
+                ),
+
+                const SizedBox(height: 8),
+
+                Text(
+                  "Create your account to continue",
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 16,
+                  ),
+                ),
+
+                const SizedBox(height: 30),
                 buildField(
                   controller: firstname,
                   label: "First Name",
                   hint: "Enter your first name",
                   icon: Icons.person_outline,
-                  validator: (v) =>
-                      (v == null || v.isEmpty) ? 'please enter name' : null,
+
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) {
+                      return "Please enter name";
+                    }
+                     return null;
+                  },
                 ),
                 buildField(
                   controller: lastname,
                   label: "Last Name",
                   hint: "Enter your last name",
                   icon: Icons.person_outline,
-                  validator: (v) => (v == null || v.isEmpty)
-                      ? 'please enter surname'
-                      : null,
+
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) {
+                      return "Please enter surname";
+                    }
+                   return null;
+                  },
                 ),
                 buildField(
                   controller: email,
@@ -177,8 +326,18 @@ Future<void> register() async {
                   hint: "Enter your email",
                   icon: Icons.email_outlined,
                   keyboardType: TextInputType.emailAddress,
-                  validator: (v) =>
-                      (v == null || v.isEmpty) ? 'please enter email' : null,
+
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) {
+                      return "Please enter email";
+                    }
+
+                    if (!v.contains("@")) {
+                      return "Please enter a valid email";
+                    }
+
+                    return null;
+                  },
                 ),
                 buildField(
                   controller: phonenumber,
@@ -186,9 +345,14 @@ Future<void> register() async {
                   hint: "Enter your phone number",
                   icon: Icons.phone_outlined,
                   keyboardType: TextInputType.phone,
-                  validator: (v) => (v == null || v.isEmpty)
-                      ? 'please enter phone number'
-                      : null,
+
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) {
+                      return "Please enter phone number";
+                    }
+
+                    return null;
+                  },
                 ),
                 buildField(
                   controller: password,
@@ -196,16 +360,31 @@ Future<void> register() async {
                   hint: "Enter your password",
                   icon: Icons.lock_outline,
                   obscure: !showPassword,
+
                   suffix: InkWell(
-                    onTap: () => setState(() => showPassword = !showPassword),
+                    onTap: () {
+                      setState(() {
+                        showPassword = !showPassword;
+                      });
+                    },
+
                     child: Icon(
-                      showPassword ? Icons.visibility : Icons.visibility_off,
-                      color: Colors.grey,
+                      showPassword
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      color: Colors.orange,
                     ),
                   ),
+
                   validator: (v) {
-                    if (v == null || v.isEmpty) return 'please enter password';
-                    if (v.length < 6) return 'password too short';
+                    if (v == null || v.isEmpty) {
+                      return "Please enter password";
+                    }
+
+                    if (v.length < 6) {
+                      return "Password too short";
+                    }
+
                     return null;
                   },
                 ),
@@ -215,40 +394,110 @@ Future<void> register() async {
                   hint: "Enter your password",
                   icon: Icons.lock_outline,
                   obscure: !showConfirm,
+
                   suffix: InkWell(
-                    onTap: () => setState(() => showConfirm = !showConfirm),
+                    onTap: () {
+                      setState(() {
+                        showConfirm = !showConfirm;
+                      });
+                    },
+
                     child: Icon(
-                      showConfirm ? Icons.visibility : Icons.visibility_off,
-                      color: Colors.grey,
+                      showConfirm
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      color: Colors.orange,
                     ),
                   ),
+
                   validator: (v) {
-                    if (v == null || v.isEmpty) return 'please confirm password';
-                    if (v != password.text) return 'passwords do not match';
+                    if (v == null || v.isEmpty) {
+                      return "Please confirm password";
+                    }
+
+                    if (v != password.text) {
+                      return "Passwords do not match";
+                    }
+
                     return null;
                   },
                 ),
 
-                const SizedBox(height: 10),
-                  SizedBox(
+                const SizedBox(height: 15),
+                SizedBox(
                   width: double.infinity,
                   height: 55,
+
                   child: ElevatedButton(
+                    onPressed: loading ? null : register,
+
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
+                      backgroundColor: Colors.orange.shade400,
+
+                      disabledBackgroundColor:
+                          Colors.orange.shade400.withOpacity(0.6),
+
+                      elevation: 0,
+
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(3),
                       ),
                     ),
-                    onPressed: register,
-                    child: const Text(
-                      'Create Account',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
+
+                    child: loading
+                        ? const SizedBox(
+                            width: 25,
+                            height: 25,
+
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          )
+                        : const Text(
+                            "Create Account",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                   ),
                 ),
-                 
-                const SizedBox(height: 15),
+
+                const SizedBox(height: 25),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+
+                  children: [
+                    const Text(
+                      "Already have an account? ",
+                      style: TextStyle(
+                        color: Colors.black87,
+                      ),
+                    ),
+
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+
+                      child: const Text(
+                        "Login",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.orange,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
               ],
             ),
           ),

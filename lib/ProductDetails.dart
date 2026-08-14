@@ -1,4 +1,6 @@
+
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:eureka/shop.dart';
@@ -20,48 +22,61 @@ class ProductDetails extends StatefulWidget {
 class _ProductDetailsState extends State<ProductDetails> {
   final Set<dynamic> selectedExtraIds = {};
 
+  static const Color backgroundColor =
+      Color.fromARGB(255, 237, 228, 216);
+
+  static const Color primaryColor = Colors.orange;
+   static const Color lightOrange = Color(0xFFFFCC80);
+   static const Color cardColor = Colors.white;
+   static const Color textColor = Colors.black;
+   static const Color secondaryTextColor = Color(0xFF757575);
+
   String getLocalizedText(String text) {
     try {
       final Map<String, dynamic> data = jsonDecode(text);
-      return data[widget.currentLanguage] ?? data["fr"] ?? data.values.first;
+       return data[widget.currentLanguage] ??
+          data["fr"] ??
+          data.values.first;
     } catch (e) {
       return text;
     }
   }
-
   bool _isFree(Map extra) {
-    final type = (extra["type"] ?? "PAYANT").toString().toUpperCase();
-    return type == "GRATUIT";
+    final type =
+        (extra["type"] ?? "PAYANT").toString().toUpperCase();
+        return type == "GRATUIT";
   }
-
-  num _extraPrice(Map extra) {
+num _extraPrice(Map extra) {
     if (_isFree(extra)) return 0;
-    return extra["price"] ?? 0;
+     return extra["price"] ?? 0;
   }
-
-  String _extraName(Map extra) {
-    final raw = extra["accompagnement_name"] ?? extra["name"] ?? "";
-    return getLocalizedText(raw.toString());
+String _extraName(Map extra) {
+    final raw =
+        extra["accompagnement_name"] ??
+        extra["name"] ??
+        "";
+        return getLocalizedText(raw.toString());
   }
-
-  num get _selectedExtrasTotal {
-    final List accompagnements = widget.product["accompagnements"] ?? [];
-    num sum = 0;
-    for (var extra in accompagnements) {
+num get _selectedExtrasTotal {
+    final List accompagnements =
+        widget.product["accompagnements"] ?? [];
+  num sum = 0; for (var extra in accompagnements) {
       if (selectedExtraIds.contains(extra["id"])) {
         sum += _extraPrice(extra);
       }
     }
-    return sum;
+return sum;
   }
-
   num get _totalWithExtras =>
       (widget.product["price"] ?? 0) + _selectedExtrasTotal;
 
   List<Map<String, dynamic>> _buildSelectedExtrasForCart() {
-    final List accompagnements = widget.product["accompagnements"] ?? [];
-    return accompagnements
-        .where((extra) => selectedExtraIds.contains(extra["id"]))
+    final List accompagnements =
+        widget.product["accompagnements"] ?? [];
+        return accompagnements
+        .where(
+          (extra) => selectedExtraIds.contains(extra["id"]),
+        )
         .map<Map<String, dynamic>>(
           (extra) => {
             "id": extra["id"],
@@ -76,11 +91,11 @@ class _ProductDetailsState extends State<ProductDetails> {
 
   bool _sameExtras(List a, List b) {
     if (a.length != b.length) return false;
-    final idsA = a.map((e) => e["id"]).toList()
-      ..sort((x, y) => x.toString().compareTo(y.toString()));
-    final idsB = b.map((e) => e["id"]).toList()
-      ..sort((x, y) => x.toString().compareTo(y.toString()));
-    for (int i = 0; i < idsA.length; i++) {
+     final idsA = a.map((e) => e["id"]).toList()
+      ..sort((x, y) => x.toString().compareTo(y.toString()), );
+      final idsB = b.map((e) => e["id"]).toList()
+      ..sort((x, y) => x.toString().compareTo(y.toString()),);
+      for (int i = 0; i < idsA.length; i++) {
       if (idsA[i] != idsB[i]) return false;
     }
     return true;
@@ -88,18 +103,28 @@ class _ProductDetailsState extends State<ProductDetails> {
 
   Widget _extraImagePlaceholder() {
     return Container(
-      width: 55,
-      height: 55,
-      color: Colors.grey.shade200,
-      child: const Icon(Icons.fastfood, color: Colors.grey, size: 26),
+      width: 58,
+      height: 58,
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: const Icon(
+        Icons.fastfood_outlined,
+        color: Colors.orange,
+        size: 26,
+      ),
     );
   }
 
-  Map<String, dynamic>? _extractCompanyLocation(Map<String, dynamic> product) {
-    String? name = (product["companies_name"] ?? product["company_name"])
-        ?.toString();
-    if (name != null && name.isEmpty) name = null;
-
+  Map<String, dynamic>? _extractCompanyLocation(
+    Map<String, dynamic> product,
+  ) {
+    String? name =
+        (product["companies_name"] ?? product["company_name"])?.toString();
+         if (name != null && name.isEmpty) {
+      name = null;
+    }
     dynamic company = product["company"];
 
     final latCandidates = [
@@ -109,6 +134,7 @@ class _ProductDetailsState extends State<ProductDetails> {
       if (company is Map) company["latitude"],
       if (company is Map) company["lat"],
     ];
+
     final lngCandidates = [
       product["companies_longitude"],
       product["company_longitude"],
@@ -119,76 +145,109 @@ class _ProductDetailsState extends State<ProductDetails> {
 
     double? lat;
     double? lng;
+
     for (final c in latCandidates) {
-      if (c != null) {
-        lat = double.tryParse(c.toString());
-        if (lat != null) break;
+    if (c != null) {
+    lat = double.tryParse(c.toString());
+    if (lat != null) break;
       }
     }
+
     for (final c in lngCandidates) {
       if (c != null) {
         lng = double.tryParse(c.toString());
+
         if (lng != null) break;
       }
     }
 
-    if (lat == null || lng == null) return null;
+    if (lat == null || lng == null) {
+      return null;
+    }
 
-    return {"name": name ?? "Restaurant", "lat": lat, "lng": lng};
+    return {
+      "name": name ?? "Restaurant",
+      "lat": lat,
+      "lng": lng,
+    };
+  }
+  Widget _sectionTitle(
+    String title, {
+    Widget? trailing,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: textColor,
+          ),
+        ),
+
+        if (trailing != null) trailing,
+      ],
+    );
+  }
+
+  Widget _softIcon(
+    IconData icon, {
+    double size = 42,
+  }) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(13),
+      ),
+      child: Icon(
+        icon,
+        color: primaryColor,
+        size: size * 0.48,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final cart = Hive.box("cart");
-
-    final List availableTimes = widget.product["availableTimes"] ?? [];
-
-    final List accompagnements = widget.product["accompagnements"] ?? [];
-
-    final String title = getLocalizedText(widget.product["title"]);
-
-    final String description = getLocalizedText(widget.product["description"]);
-
-    final String image =
-        (widget.product["images"] != null &&
-            widget.product["images"].isNotEmpty)
-        ? widget.product["images"][0]["image"].toString()
-        : "";
-
-    final bool isAvailable = widget.product["isProductAvailable"] == 1;
+    final List availableTimes =widget.product["availableTimes"] ?? [];
+      final List accompagnements = widget.product["accompagnements"] ?? [];
+       final String title =getLocalizedText(widget.product["title"]);
+       final String description = getLocalizedText(widget.product["description"]);
+       final String image =(widget.product["images"] != null &&
+                widget.product["images"].isNotEmpty)
+            ? widget.product["images"][0]["image"].toString()
+            : "";
+            final bool isAvailable =widget.product["isProductAvailable"] == 1;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFC),
-
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF9FAFC),
+        backgroundColor: backgroundColor,
         elevation: 0,
         automaticallyImplyLeading: false,
-        titleSpacing: 16,
 
         leading: Padding(
-          padding: const EdgeInsets.only(left: 12),
-          child: Container(
-            margin: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFFF0F2F5), width: 1.5),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
+          padding: const EdgeInsets.only(
+            left: 12,
+          ),
+
+          child: CircleAvatar(
+            backgroundColor: Colors.grey.shade100,
+
             child: IconButton(
               padding: EdgeInsets.zero,
+
               icon: const Icon(
-                Icons.arrow_back_ios_new_rounded,
-                size: 18,
-                color: Color(0xFF1E2022),
+                Icons.arrow_back,
+                color: Colors.black,
+                size: 20,
               ),
+
               onPressed: () {
                 Navigator.pop(context);
               },
@@ -199,9 +258,9 @@ class _ProductDetailsState extends State<ProductDetails> {
         title: const Text(
           "Détails du produit",
           style: TextStyle(
-            color: Color(0xFF1E2022),
-            fontSize: 17,
-            fontWeight: FontWeight.w800,
+            color: Colors.black,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
           ),
         ),
 
@@ -210,38 +269,35 @@ class _ProductDetailsState extends State<ProductDetails> {
             valueListenable: cart.listenable(),
             builder: (context, Box box, _) {
               int total = 0;
-
-              for (int i = 0; i < box.length; i++) {
-                total += (box.getAt(i)["quantity"] ?? 0) as int;
+               for (int i = 0; i < box.length; i++) {
+                total +=(box.getAt(i)["quantity"] ?? 0) as int;
               }
-
               return Padding(
-                padding: const EdgeInsets.only(right: 16),
+                padding: const EdgeInsets.only(
+                  right: 16,
+                ),
+
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    Container(
-                      width: 42,
-                      height: 42,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: const Color(0xFFF0F2F5),
-                          width: 1.5,
-                        ),
-                      ),
-                      child: IconButton(
+                    CircleAvatar(
+                      radius: 21,
+                      backgroundColor: Colors.white,
+                       child: IconButton(
                         padding: EdgeInsets.zero,
+
                         icon: const Icon(
                           Icons.shopping_bag_outlined,
-                          color: Color(0xFF1E2022),
+                          color: Colors.black,
                           size: 21,
                         ),
+
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => const Shop()),
+                            MaterialPageRoute(
+                              builder: (_) => const Shop(),
+                            ),
                           );
                         },
                       ),
@@ -251,26 +307,33 @@ class _ProductDetailsState extends State<ProductDetails> {
                       Positioned(
                         right: -3,
                         top: -3,
+
                         child: Container(
-                          constraints: const BoxConstraints(
+                          constraints:
+                              const BoxConstraints(
                             minWidth: 19,
                             minHeight: 19,
                           ),
-                          padding: const EdgeInsets.symmetric(
+
+                          padding:
+                              const EdgeInsets.symmetric(
                             horizontal: 5,
                             vertical: 2,
                           ),
+
                           decoration: const BoxDecoration(
-                            color: Color(0xFFFF5722),
+                            color: Colors.orange,
                             shape: BoxShape.circle,
                           ),
+
                           child: Text(
                             "$total",
                             textAlign: TextAlign.center,
+
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 10,
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
@@ -285,51 +348,48 @@ class _ProductDetailsState extends State<ProductDetails> {
 
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
+
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment:
+              CrossAxisAlignment.start,
+
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: Hero(
+             Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8,20, 0,),
+               child: Hero(
                 tag: widget.product["id"],
-                child: Container(
-                  height: 300,
+                 child: Container(
+                  height: 290,
                   width: double.infinity,
+
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(26),
-                    border: Border.all(color: const Color(0xFFF0F2F5)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 18,
-                        offset: const Offset(0, 7),
+                    borderRadius: BorderRadius.circular(28),
+                     boxShadow: [BoxShadow(
+                        color: Colors.black.withOpacity(0.06),
+                        blurRadius: 15,
+                        offset: const Offset(0, 6),
                       ),
                     ],
                   ),
+
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(26),
-                    child: image.isNotEmpty
-                        ? Image.network(
-                            image,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stack) {
-                              return Container(
-                                color: const Color(0xFFF0F2F5),
-                                child: const Icon(
-                                  Icons.image_not_supported_outlined,
-                                  color: Color(0xFF8A94A6),
-                                  size: 45,
+                    borderRadius: BorderRadius.circular(28),
+                     child: image.isNotEmpty? Image.network(
+                     image,fit: BoxFit.cover,
+                     errorBuilder: (context, error, stack) {
+                     return Container( color: Colors.white,
+                      child: const Icon( Icons.image_not_supported_outlined,
+                      color: Colors.orange,size: 50,
                                 ),
                               );
                             },
                           )
                         : Container(
-                            color: const Color(0xFFF0F2F5),
-                            child: const Icon(
-                              Icons.fastfood_outlined,
-                              color: Color(0xFF8A94A6),
-                              size: 45,
+                            color: Colors.white,
+                            child: const Icon(Icons.fastfood_outlined,
+                              color: Colors.orange,
+                              size: 50,
                             ),
                           ),
                   ),
@@ -337,30 +397,28 @@ class _ProductDetailsState extends State<ProductDetails> {
               ),
             ),
 
-            const SizedBox(height: 18),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+            const SizedBox(height: 20),
+             Container(width: double.infinity,
+             padding: const EdgeInsets.fromLTRB(22,24,22,30,),
               decoration: const BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(32),
+                ),
               ),
+
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Nom + disponibilité
+                 children: [
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                    crossAxisAlignment: CrossAxisAlignment.start,children: [
                       Expanded(
-                        child: Text(
-                          title,
-                          style: const TextStyle(
-                            fontSize: 25,
+                        child: Text( title,
+                        style: const TextStyle(
+                            fontSize: 27,
                             height: 1.15,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.5,
-                            color: Color(0xFF1E2022),
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
                           ),
                         ),
                       ),
@@ -368,57 +426,36 @@ class _ProductDetailsState extends State<ProductDetails> {
                       const SizedBox(width: 12),
 
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 9,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isAvailable
-                              ? const Color(0xFFEAF8EF)
-                              : const Color(0xFFFFEEEE),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          isAvailable
-                              ? Icons.check_circle_rounded
-                              : Icons.cancel_rounded,
-                          size: 18,
-                          color: isAvailable
-                              ? Colors.green.shade600
-                              : Colors.red.shade500,
+                        padding:  const EdgeInsets.symmetric(  horizontal: 10,vertical: 8,  ),
+                          decoration: BoxDecoration(
+                          color: isAvailable ? const Color(0xFFEAF7EC)  : const Color(0xFFFFEEEE),
+                           borderRadius:  BorderRadius.circular(14), ),
+                            child: Icon(  isAvailable? Icons.check_circle: Icons.cancel,
+                             size: 19,
+                              color: isAvailable ? Colors.green : Colors.red,
                         ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 15),
                   Row(
-                    children: [
-                      Container(
-                        width: 30,
-                        height: 30,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFF0EC),
-                          borderRadius: BorderRadius.circular(9),
-                        ),
-                        child: const Icon(
-                          Icons.storefront_rounded,
-                          color: Color(0xFFFF5722),
-                          size: 17,
-                        ),
+                    children: [ _softIcon(
+                        Icons.storefront_outlined,
+                        size: 38,
                       ),
 
-                      const SizedBox(width: 9),
+                      const SizedBox(width: 10),
 
                       Expanded(
                         child: Text(
-                          widget.product["companies_name"] ?? "Restaurant",
+                          widget.product[  "companies_name"] ??"Restaurant",
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF8A94A6),
+                           style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade600,
                           ),
                         ),
                       ),
@@ -430,521 +467,489 @@ class _ProductDetailsState extends State<ProductDetails> {
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 9,
+                          horizontal: 16,
+                          vertical: 10,
                         ),
+
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFFF0EC),
-                          borderRadius: BorderRadius.circular(14),
+                          color: backgroundColor,
+                          borderRadius:
+                              BorderRadius.circular(15),
                         ),
+
                         child: Text(
                           "${widget.product["price"]} ${widget.product["currency"] ?? "FBU"}",
+
                           style: const TextStyle(
-                            color: Color(0xFFFF5722),
-                            fontSize: 17,
-                            fontWeight: FontWeight.w800,
+                            color: Colors.orange,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
 
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 12),
 
-                      if (isAvailable)
-                        const Text(
-                          "Disponible",
-                          style: TextStyle(
-                            color: Color(0xFF4CAF50),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        )
-                      else
-                        const Text(
-                          "Indisponible",
-                          style: TextStyle(
-                            color: Color(0xFFE53935),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                          ),
+                      Text(
+                        isAvailable
+                            ? "Disponible"
+                            : "Indisponible",
+
+                        style: TextStyle(
+                          color: isAvailable
+                              ? Colors.green.shade600
+                              : Colors.red.shade600,
+
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
                         ),
+                      ),
                     ],
                   ),
 
-                  const SizedBox(height: 28),
-                  const Text(
-                    "Description",
-                    style: TextStyle(
-                      fontSize: 19,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF1E2022),
-                    ),
-                  ),
-
-                  const SizedBox(height: 9),
-
-                  Text(
-                    description.isEmpty
+                  const SizedBox(height: 30),
+                  _sectionTitle("Description"),
+                   const SizedBox(height: 10),
+                   Text(description.isEmpty
                         ? "Aucune description disponible."
                         : description,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      height: 1.55,
-                      color: Color(0xFF8A94A6),
-                      fontWeight: FontWeight.w500,
+                         style: TextStyle(
+                      fontSize: 14,
+                      height: 1.6,
+                      color: Colors.grey.shade600,
                     ),
                   ),
-                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Horaires",
-                        style: TextStyle(
-                          fontSize: 19,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF1E2022),
-                        ),
-                      ),
 
-                      if (availableTimes.isNotEmpty)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 9,
-                            vertical: 5,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFFF0EC),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            "${availableTimes.length} créneau${availableTimes.length > 1 ? 'x' : ''}",
-                            style: const TextStyle(
-                              color: Color(0xFFFF5722),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                    ],
+                  const SizedBox(height: 30),
+
+                  _sectionTitle(
+                    "Horaires",
+                     trailing:
+                        availableTimes.isNotEmpty
+                            ? Container(
+                                padding: const EdgeInsets .symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: backgroundColor,
+                                  borderRadius:
+                                      BorderRadius.circular(
+                                    20,
+                                  ),
+                                ),
+
+                                child: Text(
+                                  "${availableTimes.length} créneau${availableTimes.length > 1 ? 'x' : ''}",
+
+                                  style:
+                                      const TextStyle(
+                                    color: Colors.orange,
+                                    fontSize: 10,
+                                    fontWeight:
+                                        FontWeight.bold,
+                                  ),
+                                ),
+                              )
+                            : null,
                   ),
 
                   const SizedBox(height: 12),
 
                   if (availableTimes.isEmpty)
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF9FAFC),
-                        borderRadius: BorderRadius.circular(15),
-                        border: Border.all(color: const Color(0xFFF0F2F5)),
+                    Container(width: double.infinity,
+                     padding:const EdgeInsets.all(15),
+                     decoration: BoxDecoration(
+                        color: backgroundColor,
+                        borderRadius:
+                            BorderRadius.circular(16),
                       ),
-                      child: const Row(
-                        children: [
-                          Icon(
-                            Icons.access_time_rounded,
-                            color: Color(0xFF8A94A6),
-                            size: 18,
-                          ),
-                          SizedBox(width: 9),
-                          Text(
-                            "Aucun horaire disponible",
-                            style: TextStyle(
-                              color: Color(0xFF8A94A6),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
+
+                      child: Row(
+                        children: [_softIcon(Icons.access_time, size: 38, ),
+                         const SizedBox(width: 10),
+                         Text( "Aucun horaire disponible",
+                         style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 12,
+                         fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
                       ),
                     )
                   else
-                    Column(
-                      children: availableTimes.map<Widget>((time) {
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 9),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 12,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF9FAFC),
-                            borderRadius: BorderRadius.circular(15),
-                            border: Border.all(color: const Color(0xFFF0F2F5)),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 34,
-                                height: 34,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFFFF0EC),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: const Icon(
-                                  Icons.access_time_rounded,
-                                  color: Color(0xFFFF5722),
-                                  size: 18,
-                                ),
-                              ),
+                    Column( children:availableTimes.map<Widget>(
+                        (time) {
+                          return Container( margin:const EdgeInsets.only( bottom: 10,  ),
 
-                              const SizedBox(width: 11),
-
-                              Expanded(
-                                child: Text(
-                                  time["day"].toString(),
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    color: Color(0xFF1E2022),
-                                  ),
-                                ),
-                              ),
-
-                              Text(
-                                "${time["start_time"]} - ${time["end_time"]}",
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF8A94A6),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  const SizedBox(height: 28),
-                    Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Accompagnements",
-                        style: TextStyle(
-                          fontSize: 19,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF1E2022),
-                        ),
-                      ),
-
-                      if (selectedExtraIds.isNotEmpty)
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 9,
-                            vertical: 5,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFFF0EC),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            "${selectedExtraIds.length} sélectionné(s)",
-                            style: const TextStyle(
-                              color: Color(0xFFFF5722),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w700,
+                            padding:
+                                const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 12,
                             ),
-                          ),
-                        ),
-                    ],
-                  ),
 
-                  const SizedBox(height: 5),
-
-                  const Text(
-                    "Choisissez un ou plusieurs accompagnements",
-                    style: TextStyle(
-                      color: Color(0xFF8A94A6),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  if (accompagnements.isEmpty)
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(15),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF9FAFC),
-                        borderRadius: BorderRadius.circular(15),
-                        border: Border.all(color: const Color(0xFFF0F2F5)),
-                      ),
-                      child: const Row(
-                        children: [
-                          Icon(
-                            Icons.info_outline_rounded,
-                            color: Color(0xFF8A94A6),
-                            size: 18,
-                          ),
-                          SizedBox(width: 9),
-                          Text(
-                            "Aucun accompagnement disponible",
-                            style: TextStyle(
-                              color: Color(0xFF8A94A6),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  else
-                    Column(
-                      children: accompagnements.map<Widget>((extra) {
-                        final id = extra["id"];
-                        final name = _extraName(extra);
-                        final image = extra["accompagnement_image"];
-                        final free = _isFree(extra);
-                        final price = extra["price"] ?? 0;
-
-                        final isSelected = selectedExtraIds.contains(id);
-
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              if (isSelected) {
-                                selectedExtraIds.remove(id);
-                              } else {
-                                selectedExtraIds.add(id);
-                              }
-                            });
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 180),
-                            margin: const EdgeInsets.only(bottom: 10),
-                            padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: isSelected
-                                  ? const Color(0xFFFFF7F4)
-                                  : Colors.white,
-                              borderRadius: BorderRadius.circular(17),
-                              border: Border.all(
-                                color: isSelected
-                                    ? const Color(0xFFFF5722)
-                                    : const Color(0xFFF0F2F5),
-                                width: isSelected ? 1.4 : 1,
-                              ),
+                              color: backgroundColor,
+                              borderRadius:BorderRadius.circular( 16,),
                             ),
+
                             child: Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child:
-                                      (image != null &&
-                                          image.toString().isNotEmpty)
-                                      ? Image.network(
-                                          image,
-                                          width: 55,
-                                          height: 55,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (c, e, s) =>
-                                              _extraImagePlaceholder(),
-                                        )
-                                      : _extraImagePlaceholder(),
-                                ),
+                              children: [ _softIcon(Icons.access_time,size: 38, ),
 
-                                const SizedBox(width: 12),
-
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        name,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w700,
-                                          color: Color(0xFF1E2022),
-                                        ),
-                                      ),
-
-                                      const SizedBox(height: 7),
-
-                                      Row(
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 4,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: free
-                                                  ? const Color(0xFFEAF8EF)
-                                                  : const Color(0xFFFFF0EC),
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                            ),
-                                            child: Text(
-                                              free ? "GRATUIT" : "PAYANT",
-                                              style: TextStyle(
-                                                fontSize: 9,
-                                                fontWeight: FontWeight.w800,
-                                                color: free
-                                                    ? Colors.green.shade700
-                                                    : const Color(0xFFFF5722),
-                                              ),
-                                            ),
-                                          ),
-
-                                          if (!free) ...[
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              "+$price FBU",
-                                              style: const TextStyle(
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w700,
-                                                color: Color(0xFF8A94A6),
-                                              ),
-                                            ),
-                                          ],
-                                        ],
-                                      ),
-                                    ],
+                                const SizedBox(width: 11),
+                                 Expanded(
+                                  child: Text(time["day"].toString(),
+                                  style: const TextStyle(fontSize: 13,
+                                  fontWeight:FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
                                   ),
                                 ),
 
-                                Checkbox(
-                                  value: isSelected,
-                                  activeColor: const Color(0xFFFF5722),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(6),
+                                Text(
+                                  "${time["start_time"]} - ${time["end_time"]}",
+
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight:
+                                        FontWeight.w600,
+                                    color:
+                                        Colors.grey.shade600,
                                   ),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      if (value == true) {
-                                        selectedExtraIds.add(id);
-                                      } else {
-                                        selectedExtraIds.remove(id);
-                                      }
-                                    });
-                                  },
                                 ),
                               ],
                             ),
-                          ),
-                        );
-                      }).toList(),
+                          );
+                        },
+                      ).toList(),
                     ),
+
+                  const SizedBox(height: 30),
+
+                  _sectionTitle( "Accompagnements",
+                   trailing:selectedExtraIds.isNotEmpty ? Container(
+                   padding:const EdgeInsets.symmetric( horizontal: 10,vertical: 6,  ),
+                    decoration:BoxDecoration(
+                    color: backgroundColor,
+                    borderRadius:BorderRadius.circular( 20,),),
+                     child: Text("${selectedExtraIds.length} sélectionné(s)",
+                      style:const TextStyle(color: Colors.orange,fontSize: 10, fontWeight:  FontWeight.bold,
+                                  ),
+                                ),
+                              )
+                            : null,
+                  ),
+
+                  const SizedBox(height: 7),
+
+                  Text( "Choisissez un ou plusieurs accompagnements",
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 12,
+                    ),
+                  ),
+
+                  const SizedBox(height: 15),
+                  if (accompagnements.isEmpty)
+                    Container( width: double.infinity,
+                     padding: const EdgeInsets.all(16),
+                     decoration: BoxDecoration(
+                        color: backgroundColor,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+
+                      child: Row(
+                        children: [ _softIcon(Icons.info_outline, size: 38, ),
+
+                          const SizedBox(width: 10),
+
+                          Text("Aucun accompagnement disponible",
+                          style: TextStyle(
+                           color: Colors.grey.shade600,fontSize: 12,
+                           fontWeight:FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+
+                  else
+                    Column(
+                      children: accompagnements.map<Widget>(
+                        (extra) { final id = extra["id"];
+
+                          final name = _extraName(extra);
+                          final extraImage = extra[ "accompagnement_image"];
+                          final free = _isFree(extra);
+                          final price =  extra["price"] ?? 0;
+                          final isSelected = selectedExtraIds .contains(id);
+
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                if (isSelected) { selectedExtraIds .remove(id);
+                                } else {
+                                  selectedExtraIds .add(id);
+                                }
+                              });
+                            },
+
+                            child: AnimatedContainer(
+                              duration: const Duration( milliseconds: 180,),
+                              margin: const EdgeInsets.only( bottom: 10, ),
+                              padding:const EdgeInsets.all(10),
+                               decoration: BoxDecoration(
+                                color: isSelected ? const Color( 0xFFFFF8F0, ) : Colors.white,
+                                  borderRadius:BorderRadius.circular(18, ),
+                                    border: Border.all(
+                                  color: isSelected
+                                      ? Colors.orange
+                                      : Colors.grey.shade200,
+                                       width: isSelected ? 1.5 : 1,
+                                ),
+                              ),
+
+                              child: Row(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius .circular(14,),
+
+                                    child: (extraImage !=null &&extraImage .toString() .isNotEmpty) ? Image.network( extraImage, width: 58,height: 58, fit: BoxFit .cover,
+                                    errorBuilder:( context, error, stack,) {
+                                    return _extraImagePlaceholder();
+                                     }, ) : _extraImagePlaceholder(),),
+
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment .start,
+                                       children: [
+                                        Text( name, maxLines: 1, overflow:  TextOverflow .ellipsis,
+                                        style:const TextStyle(fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+
+                                        const SizedBox(
+                                            height: 8),
+
+                                        Row(
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(
+                                                horizontal: 8,
+                                                vertical: 5,
+                                              ),
+
+                                              decoration:
+                                                  BoxDecoration( color: free ? const Color( 0xFFEAF7EC, ) : backgroundColor,
+                                                   borderRadius: BorderRadius .circular(  9,
+                                                ),
+                                              ),
+
+                                              child: Text( free ? "GRATUIT" : "PAYANT",
+                                               style: TextStyle( fontSize: 9,
+                                                  fontWeight:FontWeight.bold,color: free
+                                                      ? Colors.green.shade700 : Colors.orange,
+                                                ),
+                                              ),
+                                            ),
+
+                                            if (!free) ...[
+                                              const SizedBox( width: 8),
+                                               Text( "+$price FBU",
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  fontWeight:FontWeight.w600,
+                                                  color: Colors.grey.shade600,
+                                                ),
+                                              ),
+                                            ],
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Checkbox(
+                                    value: isSelected,
+                                    activeColor: Colors.orange,
+                                     checkColor: Colors.white,
+
+                                    shape:RoundedRectangleBorder( borderRadius:BorderRadius.circular( 6,
+                                      ),
+                                    ),
+
+                                    onChanged:  (value) {  setState(() { if (value == true) { selectedExtraIds .add(id);
+                                        } else {selectedExtraIds .remove(id);
+                                        }
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ).toList(),
+                    ),
+
                   if (selectedExtraIds.isNotEmpty) ...[
                     const SizedBox(height: 5),
 
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFF5722),
+                       padding: const EdgeInsets.symmetric( horizontal: 18, vertical: 15, ),
+                       decoration: BoxDecoration(
+                        color: Colors.orange.shade400,
                         borderRadius: BorderRadius.circular(17),
                       ),
+
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
+                        mainAxisAlignment:MainAxisAlignment .spaceBetween,
+                         children: [
                           const Text(
                             "Total",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          Text(
+                             style: TextStyle(color: Colors.black, fontSize: 14, fontWeight:   FontWeight.w600, ),),
+                           Text(
                             "$_totalWithExtras FBU",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 17,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
+                             style: const TextStyle( color: Colors.black,fontSize: 18, fontWeight: FontWeight.bold, ), ),
                         ],
                       ),
                     ),
                   ],
 
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 30),
                   SizedBox(
                     width: double.infinity,
                     height: 56,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: isAvailable
-                            ? const Color(0xFFFF5722)
-                            : const Color(0xFFD5D7DA),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(17),
+                        backgroundColor: isAvailable ? Colors.orange.shade400  : Colors.grey.shade300,
+                        disabledBackgroundColor: Colors.grey.shade300,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                          borderRadius:BorderRadius.circular(3),
                         ),
                       ),
 
                       onPressed: isAvailable
                           ? () {
-                              final cart = Hive.box("cart");
-
-                              bool exist = false;
-
-                              final selectedExtras =
-                                  _buildSelectedExtrasForCart();
-
-                              final companyLocation = _extractCompanyLocation(
+                              final cart = Hive.box("cart"); bool exist = false;
+                               final selectedExtras = _buildSelectedExtrasForCart();
+                               final companyLocation =
+                                  _extractCompanyLocation(
                                 widget.product,
                               );
-
-                              for (int i = 0; i < cart.length; i++) {
-                                var item = cart.getAt(i);
-
-                                final itemExtras = List.from(
+                              for (
+                                int i = 0;
+                                i < cart.length;
+                                  i++
+                              ) {
+                                var item =
+                                    cart.getAt(i);
+                                final itemExtras =
+                                    List.from(
                                   item["extras"] ?? [],
                                 );
 
-                                if (item["id"] == widget.product["id"] &&
-                                    _sameExtras(itemExtras, selectedExtras)) {
+                                if (item["id"] ==
+                                        widget.product[
+                                            "id"] &&
+                                    _sameExtras(
+                                      itemExtras,
+                                      selectedExtras,
+                                    )) {
                                   item["quantity"]++;
-                                  cart.putAt(i, item);
+
+                                  cart.putAt(
+                                    i,
+                                    item,
+                                  );
+
                                   exist = true;
+
                                   break;
                                 }
                               }
-
                               if (!exist) {
                                 cart.add({
-                                  "id": widget.product["id"],
-                                  "title": getLocalizedText(
-                                    widget.product["title"],
+                                  "id": widget
+                                      .product["id"],
+
+                                  "title":
+                                      getLocalizedText(
+                                    widget.product[
+                                        "title"],
                                   ),
-                                  "price": widget.product["price"],
-                                  "image": widget.product["images"][0]["image"],
+
+                                  "price": widget
+                                      .product["price"],
+
+                                  "image": widget
+                                      .product["images"][0]["image"],
+
                                   "quantity": 1,
-                                  "extras": selectedExtras,
-                                  "company_name": companyLocation?["name"],
-                                  "company_lat": companyLocation?["lat"],
-                                  "company_lng": companyLocation?["lng"],
+
+                                  "extras":
+                                      selectedExtras,
+
+                                  "company_name":
+                                      companyLocation?[
+                                          "name"],
+
+                                  "company_lat":
+                                      companyLocation?[
+                                          "lat"],
+
+                                  "company_lng":
+                                      companyLocation?[
+                                          "lng"],
                                 });
                               }
-
-                              ScaffoldMessenger.of(context).showSnackBar(
+                              ScaffoldMessenger.of(
+                                context,
+                              ).showSnackBar(
                                 SnackBar(
-                                  backgroundColor: const Color(0xFF1E2022),
-                                  behavior: SnackBarBehavior.floating,
-                                  margin: const EdgeInsets.all(16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
+                                  backgroundColor:
+                                      Colors.black,
+
+                                  behavior:
+                                      SnackBarBehavior
+                                          .floating,
+
+                                  margin:
+                                      const EdgeInsets
+                                          .all(16),
+
+                                  shape:
+                                      RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius
+                                            .circular(
+                                      16,
+                                    ),
                                   ),
-                                  content: const Row(
+
+                                  content: Row(
                                     children: [
-                                      Icon(
-                                        Icons.check_circle_rounded,
-                                        color: Color(0xFFFF5722),
+                                      const Icon(
+                                        Icons
+                                            .check_circle,
+                                        color:
+                                            Colors.orange,
                                       ),
-                                      SizedBox(width: 10),
-                                      Text(
+
+                                      const SizedBox(
+                                          width: 10),
+
+                                      const Text(
                                         "Produit ajouté au panier",
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w700,
+
+                                        style:
+                                            TextStyle(
+                                          fontWeight:
+                                              FontWeight
+                                                  .bold,
                                         ),
                                       ),
                                     ],
@@ -955,20 +960,27 @@ class _ProductDetailsState extends State<ProductDetails> {
                           : null,
 
                       child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment:
+                            MainAxisAlignment.center,
+
                         children: [
                           Icon(
-                            Icons.shopping_bag_outlined,
+                            Icons
+                                .shopping_bag_outlined,
                             color: Colors.white,
                             size: 21,
                           ),
+
                           SizedBox(width: 10),
+
                           Text(
                             "Ajouter au panier",
+
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w800,
+                              fontSize: 16,
+                              fontWeight:
+                                  FontWeight.bold,
                             ),
                           ),
                         ],

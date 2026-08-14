@@ -45,11 +45,17 @@ class CacheHelper {static Future<void> saveToken(String token) async {
     await prefs.remove("token");
   }
 
-  static Future<void> logout() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove("token");
-    await prefs.remove("isLoggedIn");
-  }
+ static Future<void> logout() async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove("token");
+  await prefs.remove("isLoggedIn");
+  await prefs.remove("id");
+  await prefs.remove("firstname");
+  await prefs.remove("lastname");
+  await prefs.remove("email");
+  await prefs.remove("phone");
+  await prefs.remove("country");
+}
 
   static Future<void> saveUserData(Map<String, dynamic> user) async {
   final prefs = await SharedPreferences.getInstance();

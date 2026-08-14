@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:eureka/cache_helper.dart';
 
-
 class Profile extends StatefulWidget {
   const Profile({super.key});
 
@@ -29,17 +28,43 @@ class _ProfileState extends State<Profile> {
     phone = await CacheHelper.getPhone();
     country = await CacheHelper.getCountry();
 
-      print(firstname);
-      print(lastname);
-      print(email);
-      print(phone);
-      print(country);
-
-
     setState(() {});
   }
 
-  
+  Future<void> logout() async {
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Déconnexion"),
+        content: const Text("Voulez-vous vraiment vous déconnecter ?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Annuler"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text(
+              "Déconnexion",
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await CacheHelper.logout(); 
+
+      if (mounted) {
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          'LoginWidget', 
+          (route) => false,
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +72,13 @@ class _ProfileState extends State<Profile> {
       appBar: AppBar(
         title: const Text("Mon Profil"),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: "Déconnexion",
+            onPressed: logout,
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -105,8 +137,6 @@ class _ProfileState extends State<Profile> {
             ),
 
             const Spacer(),
-
-        
           ],
         ),
       ),

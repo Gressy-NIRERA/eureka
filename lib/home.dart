@@ -16,7 +16,6 @@ class CategoryModel {
     required this.name,
     required this.image,
   });
-
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
     return CategoryModel(
       name: jsonDecode(json['name']),
@@ -157,9 +156,7 @@ class _HomeState extends State<Home> {
       name = decoded[selectedLanguage] ?? decoded["fr"] ?? decoded.values.first;
     } catch (e) {
       name = rawName;
-    }
-    if (name.isEmpty) name = "Restaurant";
-
+    }if (name.isEmpty) name = "Restaurant";
     final image = (company["image"] ??
             company["logo"] ??
             company["photo"] ??
@@ -324,7 +321,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kBg,
+      backgroundColor: const Color.fromARGB(255, 237, 228, 216),
       appBar: AppBar(
         backgroundColor: kBg,
         elevation: 0,
