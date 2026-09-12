@@ -59,7 +59,7 @@ class _HomeState extends State<Home> {
     ["fr", "Fr", "🇫🇷"],
     ["en", "En", "🇬🇧"],
     ["sw", "Sw", "🇹🇿"],
-    ["rn", "Kir", "🇧🇮"],
+    ["es", "Kir", "🇧🇮"],
   ];
 
   @override
