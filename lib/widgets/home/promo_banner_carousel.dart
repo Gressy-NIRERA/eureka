@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:eureka/core/strings/app_strings.dart';
 import 'package:eureka/core/theme/app_colors.dart';
 
 class PromoSlide {
@@ -16,27 +17,31 @@ class PromoSlide {
   });
 }
 
+/// The Duma food catalog spans drinks, breakfast, starters, meat & fish,
+/// vegetarian, bakery and dairy — not a single cuisine — so these slides
+/// promote the marketplace itself rather than one dish, in French to match
+/// the rest of the app.
 const List<PromoSlide> kPromoSlides = [
   PromoSlide(
-    tag: 'HOT & CRISPY',
-    title: 'Crave the Crispy\nPerfection!',
-    subtitle: 'Hand-breaded. Freshly cooked. Every time.',
+    tag: 'LIVRAISON RAPIDE',
+    title: 'Votre repas,\nlivré rapidement',
+    subtitle: 'Des dizaines de restaurants réunis pour vous.',
     imageUrl:
-        'https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=900&q=80',
+        'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=80',
   ),
   PromoSlide(
-    tag: 'NEW ARRIVAL',
-    title: 'Loaded Zinger\nCombo',
-    subtitle: 'Spicy fillet, fries and a cold drink.',
+    tag: 'NOUVEAU',
+    title: 'De nouvelles\nsaveurs chaque jour',
+    subtitle: 'Des plats fraîchement préparés par nos partenaires.',
     imageUrl:
-        'https://images.unsplash.com/photo-1606755962773-d324e0a13086?auto=format&fit=crop&w=900&q=80',
+        'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80',
   ),
   PromoSlide(
-    tag: 'FAMILY SIZE',
-    title: 'Share the\nGoodness',
-    subtitle: 'Buckets made for the whole table.',
+    tag: 'OFFRE DU MOMENT',
+    title: 'Jusqu\'à -30%\nsur une sélection',
+    subtitle: 'Profitez des promotions disponibles maintenant.',
     imageUrl:
-        'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=900&q=80',
+        'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=900&q=80',
   ),
 ];
 
@@ -66,7 +71,7 @@ class _PromoBannerCarouselState extends State<PromoBannerCarousel> {
     return Column(
       children: [
         SizedBox(
-          height: 196,
+          height: 208,
           child: PageView.builder(
             controller: _controller,
             itemCount: kPromoSlides.length,
@@ -212,7 +217,7 @@ class _PromoCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'Order Now',
+                          AppStrings.orderNow,
                           style: TextStyle(
                             color: AppColors.bannerEnd,
                             fontWeight: FontWeight.bold,

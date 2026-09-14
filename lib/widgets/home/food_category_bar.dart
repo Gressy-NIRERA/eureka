@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:eureka/core/strings/app_strings.dart';
 import 'package:eureka/core/theme/app_colors.dart';
 import 'package:eureka/data/models/food_models.dart';
 
@@ -41,7 +42,7 @@ class FoodCategoryBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = <({int id, String label, String? image})>[
-      (id: kAllCategoriesId, label: 'All Items', image: null),
+      (id: kAllCategoriesId, label: AppStrings.allCategories, image: null),
       for (final c in categories) (id: c.id, label: c.name, image: c.image),
     ];
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:eureka/core/strings/app_strings.dart';
 import 'package:eureka/core/theme/app_colors.dart';
 
 class HomeBottomNav extends StatelessWidget {
@@ -10,11 +11,11 @@ class HomeBottomNav extends StatelessWidget {
   final int cartCount;
 
   static const _items = [
-    (icon: Icons.home_rounded, label: 'Home'),
-    (icon: Icons.grid_view_rounded, label: 'Menu'),
-    (icon: Icons.receipt_long_rounded, label: 'Orders'),
-    (icon: Icons.local_offer_rounded, label: 'Offers'),
-    (icon: Icons.person_rounded, label: 'Profile'),
+    (icon: Icons.home_rounded, label: AppStrings.navHome),
+    (icon: Icons.grid_view_rounded, label: AppStrings.navMenu),
+    (icon: Icons.receipt_long_rounded, label: AppStrings.navOrders),
+    (icon: Icons.local_offer_rounded, label: AppStrings.navOffers),
+    (icon: Icons.person_rounded, label: AppStrings.navProfile),
   ];
 
   @override

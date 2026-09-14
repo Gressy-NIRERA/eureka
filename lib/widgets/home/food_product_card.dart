@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:eureka/core/strings/app_strings.dart';
 import 'package:eureka/core/theme/app_colors.dart';
 import 'package:eureka/data/models/food_models.dart';
 
@@ -173,9 +174,9 @@ class _BadgeChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (label, color) = switch (badge) {
-      ProductBadge.bestseller => ('BESTSELLER', AppColors.badge),
-      ProductBadge.popular => ('POPULAR', AppColors.primary),
-      ProductBadge.discount => ('SAVE ${product.discountPercent}%', AppColors.success),
+      ProductBadge.bestseller => (AppStrings.badgeBestseller, AppColors.badge),
+      ProductBadge.popular => (AppStrings.badgePopular, AppColors.primary),
+      ProductBadge.discount => (AppStrings.badgeDiscount(product.discountPercent), AppColors.success),
       ProductBadge.none => ('', Colors.transparent),
     };
 
