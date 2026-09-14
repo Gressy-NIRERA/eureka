@@ -1,8 +1,13 @@
 import 'package:dio/dio.dart';
 
-class Api {
-  final String baseurl = "https://client.duma.africa/api/v1";
+import 'package:eureka/core/network/duma_endpoints.dart';
 
+/// Authentication client for the Duma **client** service.
+///
+/// Endpoints match `ClientEndpoints` in the official Duma app
+/// (`duma_taxi/lib/core/api/endpoints.dart`): `POST /user/login` and
+/// `POST /user/register`, not the previously guessed `/login` / `/register`.
+class Api {
   late final Dio dio;
 
   Api(this.dio);
@@ -11,11 +16,12 @@ class Api {
       String email,
       String password) async {
     final response = await dio.post(
-      "$baseurl/login", // Vérifie si c'est bien cette URL
+      ClientEndpoints.login,
       data: {
         "email": email,
         "password": password,
       },
+      options: Options(headers: {'Accept': 'application/json'}),
     );
 
     return Map<String, dynamic>.from(response.data);
@@ -31,7 +37,7 @@ class Api {
     String confirmPassword,
   ) async {
     final response = await dio.post(
-      "$baseurl/register", // Vérifie aussi cette URL
+      ClientEndpoints.register,
       data: {
         "firstname": firstname,
         "lastname": lastname,
@@ -41,6 +47,7 @@ class Api {
         "password": password,
         "confirm_password": confirmPassword,
       },
+      options: Options(headers: {'Accept': 'application/json'}),
     );
 
     return Map<String, dynamic>.from(response.data);

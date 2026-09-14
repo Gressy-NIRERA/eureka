@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:eureka/api.dart';
 import 'register.dart';
+import 'home.dart' as food;
 
 void main() {
   runApp(const MyApp());
@@ -15,8 +16,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: "Eureka",
-      theme: ThemeData(primarySwatch: Colors.pink),
-      home: const HomePage(),
+      theme: ThemeData(primarySwatch: Colors.deepOrange),
+      home: const food.HomePage(),
     );
   }
 }
